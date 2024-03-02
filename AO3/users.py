@@ -5,7 +5,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from . import threadable, utils
-from .common import get_work_from_banner
+from .common import get_work_from_banner, get_work_or_series_from_banner
 from .requester import requester
 
 
@@ -263,9 +263,9 @@ class User:
         ol = self._soup_works.find("ol", {"class": "work index group"})
 
         for work in ol.find_all("li", {"role": "article"}):
-            if work.h4 is None:
+            if work.h4 is None or work.h4.a is None:
                 continue
-            self._works.append(get_work_from_banner(work))
+            self._bookmarks.append(get_work_from_banner(work))
 
     @cached_property
     def bookmarks(self):
@@ -333,7 +333,7 @@ class User:
             authors = []
             if work.h4 is None:
                 continue
-            self._bookmarks.append(get_work_from_banner(work))
+            self._bookmarks.append(get_work_or_series_from_banner(work))
     
     @cached_property
     def bio(self):
