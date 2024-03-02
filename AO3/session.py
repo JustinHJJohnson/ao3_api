@@ -437,6 +437,9 @@ class Session(GuestSession):
         """
         Get bookmarked works. Loads them if they haven't been previously
 
+        Args:
+            pages list[int]: the pages to fetch
+        
         Returns:
             list: List of tuples (workid, workname, authors)
         """
@@ -446,8 +449,9 @@ class Session(GuestSession):
                 self.load_bookmarks_threaded()
             else:
                 self._bookmarks = []
-                for page in range(self._bookmark_pages if pages is None else min(pages, self._bookmark_pages)):
-                    self._load_bookmarks(page=page+1)
+                for page in pages:
+                    if page <= self._bookmark_pages:
+                        self._load_bookmarks(page=page+1)
         return self._bookmarks
         
     
@@ -456,12 +460,16 @@ class Session(GuestSession):
         """
         Get bookmarked works using threads.
         This function is threadable.
+
+        Args:
+            pages list[int]: the pages to fetch
         """ 
         
         threads = []
         self._bookmarks = []
-        for page in range(self._bookmark_pages if pages is None else min(pages, self._bookmark_pages)):
-            threads.append(self._load_bookmarks(page=page+1, threaded=True))
+        for page in pages:
+            if page <= self._bookmark_pages:
+                threads.append(self._load_bookmarks(page=page+1, threaded=True))
         for thread in threads:
             thread.join()
     
