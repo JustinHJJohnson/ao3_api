@@ -433,7 +433,7 @@ class Session(GuestSession):
                 n = int(text)
         return n
     
-    def get_bookmarks(self, use_threading=False):
+    def get_bookmarks(self, use_threading=False, pages=None):
         """
         Get bookmarked works. Loads them if they haven't been previously
 
@@ -446,12 +446,13 @@ class Session(GuestSession):
                 self.load_bookmarks_threaded()
             else:
                 self._bookmarks = []
-                for page in range(self._bookmark_pages):
+                for page in range(self._bookmark_pages if pages is None else min(pages, self._bookmark_pages)):
                     self._load_bookmarks(page=page+1)
         return self._bookmarks
+        
     
     @threadable.threadable
-    def load_bookmarks_threaded(self):
+    def load_bookmarks_threaded(self, pages=None):
         """
         Get bookmarked works using threads.
         This function is threadable.
@@ -459,7 +460,7 @@ class Session(GuestSession):
         
         threads = []
         self._bookmarks = []
-        for page in range(self._bookmark_pages):
+        for page in range(self._bookmark_pages if pages is None else min(pages, self._bookmark_pages)):
             threads.append(self._load_bookmarks(page=page+1, threaded=True))
         for thread in threads:
             thread.join()

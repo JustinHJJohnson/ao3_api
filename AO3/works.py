@@ -242,6 +242,10 @@ class Work:
         except AttributeError:
             pass
         try:
+            metadata["parts_in_series"] = self.parts_in_series
+        except AttributeError:
+            pass
+        try:
             metadata["chapter_titles"] = list(map(lambda chapter: chapter.title, self.chapters))
         except AttributeError:
             pass
@@ -536,6 +540,20 @@ class Work:
             setattr(series, "name", seriesname)
             s.append(series)
         return s
+    
+    @cached_property
+    def parts_in_series(self):
+        """Returns the parts in the series this work belongs to"""
+        
+        dd = self._soup.find("dd", {"class": "series"})
+        if dd is None:
+            return []
+        
+        parts = []
+        for span in dd.find_all("span", {"class": "position"}):
+            part = int(span.getText().split(" ", 3)[1])
+            parts.append(part)
+        return parts
 
     @cached_property
     def authors(self):
